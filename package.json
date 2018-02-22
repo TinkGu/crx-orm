@@ -4,7 +4,6 @@
   "description": "simple orm for chrome extension store",
   "main": "lib/index.js",
   "scripts": {
-    "build:test": "cross-env NODE_ENV=cjs babel test/a.js -o test/x.js",
     "test": "cross-env NODE_ENV=cjs jest test --no-cache",
     "clean": "rimraf lib dist es",
     "build:cjs": "cross-env NODE_ENV=cjs babel src --out-dir lib",

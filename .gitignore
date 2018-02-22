@@ -3,6 +3,8 @@ coverage
 node_modules
 stats.json
 dist
+lib
+es
 
 # Cruft
 *.swp
