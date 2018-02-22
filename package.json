@@ -1,6 +1,6 @@
 {
   "name": "crx-orm",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "simple orm for chrome extension store",
   "main": "lib/index.js",
   "scripts": {
