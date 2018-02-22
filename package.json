@@ -1,0 +1,85 @@
+{
+  "name": "crx-orm",
+  "version": "0.0.1",
+  "description": "simple orm for chrome extension store",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:test": "cross-env NODE_ENV=cjs babel test/a.js -o test/x.js",
+    "test": "cross-env NODE_ENV=cjs jest test --no-cache",
+    "clean": "rimraf lib dist es",
+    "build:cjs": "cross-env NODE_ENV=cjs babel src --out-dir lib",
+    "build:es": "cross-env BABEL_ENV=es NODE_ENV=es babel src --out-dir es",
+    "build:umd": "cross-env BABEL_ENV=es NODE_ENV=development rollup -c -o dist/crx-orm.js",
+    "build:umd:min": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c -o dist/crx-orm.min.js",
+    "build": "npm run clean && npm run build:cjs && npm run build:es && npm run build:umd && npm run build:umd:min"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TinkGu/crx-orm.git"
+  },
+  "keywords": [
+    "crx",
+    "orm",
+    "chrome",
+    "chrome-extension",
+    "store",
+    "db",
+    "database",
+    "schema"
+  ],
+  "author": {
+    "name": "TinkGu",
+    "email": "tlwrite@126.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TinkGu/crx-orm/issues"
+  },
+  "homepage": "https://github.com/TinkGu/crx-orm#readme",
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.3",
+    "babel-jest": "^22.0.4",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "cross-env": "^5.1.1",
+    "eslint": "^4.0.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-loose-airbnb": "^1.0.0",
+    "eslint-plugin-import": "^2.8.0",
+    "jest": "^22.0.4",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.51.8",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-uglify": "^2.0.1"
+  },
+  "_id": "crx-orm@0.0.1",
+  "module": "es/index.js",
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "README.md",
+    "LICENSE"
+  ],
+  "npmName": "crx-orm",
+  "npmFileMap": [
+    {
+      "basePath": "/dist/",
+      "files": [
+        "*.js"
+      ]
+    }
+  ]
+}
