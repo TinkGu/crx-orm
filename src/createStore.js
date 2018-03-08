@@ -3,14 +3,12 @@ import createSchema from './createSchema'
 export default function createStore({
     adapter,
     schemas = [],
-    shouldSetIndex = true,
 }) {
     const store = {
         ...adapter,
         gStoreKey,
         gIdsStoreKey,
         createSchema,
-        shouldSetIndex,
     }
     const models = {}
     schemas.forEach(x => {
@@ -22,7 +20,6 @@ export default function createStore({
         adapter,
         gStoreKey,
         gIdsStoreKey,
-        shouldSetIndex,
         models,
     }
 }

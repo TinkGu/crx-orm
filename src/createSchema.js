@@ -71,7 +71,7 @@ export default function createSchema(store, {
         }
 
         const ids = (await readIds()) || []
-        const indexes = store.shouldSetIndex ? createIndexes(doc) : {}
+        const indexes = createIndexes(doc)
 
         const returns = await store.set({
             ...indexes,
@@ -109,10 +109,9 @@ export default function createSchema(store, {
             // TODO: 报错
         }
 
-        const indexes = {}
-        if (store.shouldSetIndex) {
-            Object.assign(indexes, getUselessOldIndexes(doc, oldDoc), createIndexes(doc))
-        }
+        const indexes = Object.assign({},
+            getUselessOldIndexes(doc, oldDoc),
+            createIndexes(doc))
 
         return store.set({
             ...indexes,
@@ -127,7 +126,7 @@ export default function createSchema(store, {
         }
 
         const ids = (await readIds()) || []
-        const indexes = store.shouldSetIndex ? createIndexesWithValue(doc, null) : {}
+        const indexes = createIndexesWithValue(doc, null)
 
         return store.set({
             ...indexes,
@@ -158,10 +157,6 @@ export default function createSchema(store, {
     }
 
     function hasConflict(id, doc) {
-        if (store.shouldSetIndex) {
-            return false
-        }
-
         const indexes = indexPropsFrom(doc).map(x => gStoreKey(x, doc[x]))
         return store.read(indexes).then(res => {
             return Object.keys(res).some(x => x && x !== id)
