@@ -18,10 +18,17 @@ describe('read model', () => {
         name: 'tag-xxx',
     }
 
+    const tag2 = {
+        id: 'vvv',
+        name: 'tag-vvv',
+    }
+
     const store = createStore({
         'tag:id:xxx': tag,
-        tagIds: [tag.id],
         'tag:name:tag-xxx': 'xxx',
+        'tag:id:vvv': tag2,
+        'tag:name:tag-vvv': 'vvv',
+        tagIds: [tag.id, tag2.id],
     })
     const tagModel = store.models.tag
 
@@ -33,6 +40,10 @@ describe('read model', () => {
         expect(await tagModel.find({
             name: tag.name
         })).toBe(tag)
+    })
+
+    it('should read all tags', async () => {
+        expect(await tagModel.all()).toEqual([tag, tag2])
     })
 })
 

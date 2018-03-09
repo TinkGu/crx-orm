@@ -61,6 +61,19 @@ export default function createSchema(store, {
         return store.read(idsStoreKey)
     }
 
+    /**
+     * read all items by ids
+     */
+    async function all() {
+        const ids = await readIds()
+        if (ids) {
+            const itemKeyList = ids.map(id => gStoreKey('id', id))
+            const result = await store.read(itemKeyList)
+            return Object.values(result)
+        } else {
+            return []
+        }
+    }
 
     /**
      * create document
@@ -215,6 +228,7 @@ export default function createSchema(store, {
         read,
         readRaw,
         readIds,
+        all,
         find,
         create,
         update,
