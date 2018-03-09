@@ -1,25 +1,8 @@
+/* eslint-disable no-param-reassign */
 // TODO：校验入参，报错
+import { getFieldList } from './utils'
 
-export default function createMemoryAdapter() {
-    // eslint-disable-next-line prefer-const
-    let __store = {}
-
-    function getFieldList(field) {
-        if (typeof field === 'string') {
-            return [field]
-        }
-
-        if (typeof field === 'object') {
-            return Object.keys(field)
-        }
-
-        if (Array.isArray(field)) {
-            return field
-        }
-
-        return []
-    }
-
+export default function createMemoryAdapter(__store = {}) {
     /**
      * @param {String|Array|Object} field Object key to get object from storage
      * @return {Promise}

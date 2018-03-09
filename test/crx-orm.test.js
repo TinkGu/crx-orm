@@ -26,11 +26,11 @@ describe('read model', () => {
     const tagModel = store.models.tag
 
     it('should read tag by id', async () => {
-        expect(await tagModel.readTag(tag.id)).toBe(tag)
+        expect(await tagModel.find(tag.id)).toBe(tag)
     })
 
     it('should read tag by doc name', async () => {
-        expect(await tagModel.readTag({
+        expect(await tagModel.find({
             name: tag.name
         })).toBe(tag)
     })
@@ -43,8 +43,8 @@ describe('create model', () => {
     it('should create model、id in ids、indexes', async () => {
         expect.assertions(3)
 
-        const tag = await tagModel.createTag('china')
-        const tagInRead = await tagModel.readTag(tag.id)
+        const tag = await tagModel.create({ name: 'china' })
+        const tagInRead = await tagModel.find(tag.id)
         const ids = await tagModel.readIds()
         const nameIndex = await tagModel.readRaw('name', tag.name)
 
@@ -62,8 +62,8 @@ describe('update model', () => {
     it('should update model and indexes', async () => {
         expect.assertions(3)
 
-        const tagBefore = await tagModel.createTag('china')
-        const tagAfter = await tagModel.updateTag(tagBefore, x => ({
+        const tagBefore = await tagModel.create({ name: 'china' })
+        const tagAfter = await tagModel.update(tagBefore, x => ({
             ...x,
             name: 'zh',
             desc: 'chinese shorthand',
@@ -89,9 +89,9 @@ describe('remove model', () => {
     it('should remove model、id in ids、indexes', async () => {
         expect.assertions(3)
 
-        const tag = await tagModel.createTag('china')
-        await tagModel.removeTag(tag.id)
-        const tagAfterRemove = await tagModel.readTag(tag.id)
+        const tag = await tagModel.create({ name: 'china' })
+        await tagModel.remove(tag.id)
+        const tagAfterRemove = await tagModel.find(tag.id)
         const nameIndex = await tagModel.readRaw('name', tag.name)
         const ids = await tagModel.readIds()
 

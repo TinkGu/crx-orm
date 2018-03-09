@@ -12,6 +12,14 @@ export default function createCrxAdapter() {
     }
 
     /**
+     * get the whole raw data
+     * @return {Promise}
+     */
+    function snapshot() {
+        return read(null)
+    }
+
+    /**
      * Save access token to extension sync storage
      * @param {Object} content
      * @return {Promise}
@@ -39,6 +47,7 @@ export default function createCrxAdapter() {
 
     return {
         read,
+        snapshot,
         set,
         remove,
     }

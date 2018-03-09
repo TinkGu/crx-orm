@@ -25,7 +25,7 @@ export default function createSchema(store, {
     }
 
     /**
-     * read document by id or key-value
+     * read document by id or key-value or index prop
      */
     async function read(fieldname, fieldv) {
         if (fieldname !== 'id') {
@@ -41,10 +41,17 @@ export default function createSchema(store, {
     }
 
     /**
-     * read document by id
+     * find a single document
+     * use id first, then try other index properties
+     * otherwise, return null
      */
-    async function readById(id) {
-        return read('id', id)
+    async function find(doc) {
+        const id = await readDocId(doc)
+        if (id) {
+            return read('id', id)
+        } else {
+            return null
+        }
     }
 
     /**
@@ -67,7 +74,8 @@ export default function createSchema(store, {
         }
 
         if (await hasConflict(id, doc)) {
-            // TODO: 报错
+            // TODO 完善报错信息
+            throw new Error('crx-orm: conflict')
         }
 
         const ids = (await readIds()) || []
@@ -82,7 +90,7 @@ export default function createSchema(store, {
         if (omitReturn) {
             return returns
         } else {
-            return returns || readById(id)
+            return returns || find(id)
         }
     }
 
@@ -94,8 +102,9 @@ export default function createSchema(store, {
      * @param  {string} id target id
      * @param  {function|object}
      */
-    async function update(id, setter) {
-        const oldDoc = await readById(id)
+    async function update(queryDoc, setter, options = {}) {
+        const { omitReturn } = options
+        const oldDoc = await find(queryDoc)
         if (!oldDoc) {
             // TODO: 报错，不存在
         }
@@ -103,9 +112,9 @@ export default function createSchema(store, {
         const doc = typeof setter === 'function'
             ? setter(oldDoc)
             : Object.assign({}, oldDoc, setter)
-        doc.id = id
+        doc.id = oldDoc.id
 
-        if (await hasConflict(id, doc)) {
+        if (await hasConflict(doc.id, doc)) {
             // TODO: 报错
         }
 
@@ -113,14 +122,20 @@ export default function createSchema(store, {
             getUselessOldIndexes(doc, oldDoc),
             createIndexes(doc))
 
-        return store.set({
+        const returns = await store.set({
             ...indexes,
-            [gStoreKey('id', id)]: doc,
+            [gStoreKey('id', doc.id)]: doc,
         })
+
+        if (omitReturn) {
+            return returns
+        } else {
+            return returns || find(doc.id)
+        }
     }
 
-    async function remove(id) {
-        const doc = await readById(id)
+    async function remove(queryDoc) {
+        const doc = await find(queryDoc)
         if (!doc) {
             return
         }
@@ -130,8 +145,8 @@ export default function createSchema(store, {
 
         return store.set({
             ...indexes,
-            [gStoreKey('id', id)]: null,
-            [idsStoreKey]: ids.filter(x => x !== id),
+            [gStoreKey('id', doc.id)]: null,
+            [idsStoreKey]: ids.filter(x => x !== doc.id),
         })
     }
 
@@ -156,11 +171,15 @@ export default function createSchema(store, {
         return createIndexesWithValue(doc, doc.id)
     }
 
-    function hasConflict(id, doc) {
+    async function hasConflict(id, doc) {
         const indexes = indexPropsFrom(doc).map(x => gStoreKey(x, doc[x]))
-        return store.read(indexes).then(res => {
-            return Object.keys(res).some(x => x && x !== id)
-        })
+        if (indexes.length > 0) {
+            return store.read(indexes).then(res => {
+                return Object.keys(res).some(x => res[x] && res[x] !== id)
+            })
+        } else {
+            return false
+        }
     }
 
     function getUselessOldIndexes(newDoc, oldDoc) {
@@ -173,14 +192,30 @@ export default function createSchema(store, {
         return indexes
     }
 
+    async function readDocId(doc) {
+        if (typeof doc === 'string') {
+            return doc
+        }
+
+        if (doc && typeof doc === 'object') {
+            const props = Object.keys(doc)
+            const indexProp = props.find(x => x.includes(indexProps))
+            if (indexProp) {
+                return readRaw(indexProp, doc[indexProp])
+            }
+        }
+
+        return null
+    }
+
     return {
         name,
         properties,
         idsStoreKey,
         read,
         readRaw,
-        readById,
         readIds,
+        find,
         create,
         update,
         remove,
