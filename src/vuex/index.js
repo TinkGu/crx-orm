@@ -1,22 +1,25 @@
 /* eslint-disable no-param-reassign */
 import { getFieldList } from '../utils'
 
-export function installOrmToVuex(createOrm, options) {
+export function installOrmToVuex(createOrm, options = {}) {
     const namespace = options.namespace || 'entities'
 
     return vuexStore => {
         vuexStore.registerModule(namespace, {
-            state: {},
+            namespaced: true,
+            state: {
+                data: {},
+            },
             mutations: {
                 set(state, content) {
                     if (typeof content === 'object') {
-                        state = Object.assign(state, content)
+                        state.data = Object.assign({}, state.data, content)
                     }
                 },
                 remove(state, field) {
                     const finalFields = getFieldList(field)
                     finalFields.forEach(x => {
-                        state[x] = null
+                        state.data[x] = null
                     })
                 },
             },
@@ -49,13 +52,14 @@ function createVuexAdapter(vuexStore, namespace) {
         const finalFields = getFieldList(field)
         return new Promise(resolve => {
             let result = null
+            const _data = vuexStore.state[namespace].data
             if (typeof field === 'string') {
-                result = vuexStore.state[finalFields[0]]
+                result = _data[finalFields[0]]
             } else {
                 if (finalFields.length > 0) {
                     result = {}
                     finalFields.forEach(x => {
-                        result[x] = vuexStore.state[x]
+                        result[x] = _data[x]
                     })
                 }
             }
@@ -64,18 +68,12 @@ function createVuexAdapter(vuexStore, namespace) {
         })
     }
 
-    function set(content) {
-        return new Promise(resolve => {
-            vuexStore.commit(`${namespace}/set`, content)
-            resolve()
-        })
+    async function set(content) {
+        return vuexStore.commit(`${namespace}/set`, content)
     }
 
-    function remove(field) {
-        return new Promise(resolve => {
-            vuexStore.commit(`${namespace}/remove`, field)
-            resolve()
-        })
+    async function remove(field) {
+        return vuexStore.commit(`${namespace}/remove`, field)
     }
 
     function snapshot() {
