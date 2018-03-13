@@ -1,6 +1,6 @@
 import uuid from 'uuid'
 
-export default function createSchema(store, {
+export default store => function createSchema({
     name,
     properties = {},
 }) {
@@ -21,7 +21,7 @@ export default function createSchema(store, {
      * read the value of the specified storeKey
      */
     async function readRaw(fieldname, fieldv) {
-        return store.read(gStoreKey(fieldname, fieldv))
+        return store.adapter.read(gStoreKey(fieldname, fieldv))
     }
 
     /**
@@ -58,7 +58,7 @@ export default function createSchema(store, {
      * read model ids
      */
     async function readIds() {
-        return store.read(idsStoreKey)
+        return store.adapter.read(idsStoreKey)
     }
 
     /**
@@ -68,7 +68,7 @@ export default function createSchema(store, {
         const ids = await readIds()
         if (ids) {
             const itemKeyList = ids.map(id => gStoreKey('id', id))
-            const result = await store.read(itemKeyList)
+            const result = await store.adapter.read(itemKeyList)
             return Object.values(result)
         } else {
             return []
@@ -94,7 +94,7 @@ export default function createSchema(store, {
         const ids = (await readIds()) || []
         const indexes = createIndexes(doc)
 
-        const returns = await store.set({
+        const returns = await store.adapter.set({
             ...indexes,
             [gStoreKey('id', id)]: doc,
             [idsStoreKey]: ids.concat(id),
@@ -135,7 +135,7 @@ export default function createSchema(store, {
             getUselessOldIndexes(doc, oldDoc),
             createIndexes(doc))
 
-        const returns = await store.set({
+        const returns = await store.adapter.set({
             ...indexes,
             [gStoreKey('id', doc.id)]: doc,
         })
@@ -156,7 +156,7 @@ export default function createSchema(store, {
         const ids = (await readIds()) || []
         const indexes = createIndexesWithValue(doc, null)
 
-        return store.set({
+        return store.adapter.set({
             ...indexes,
             [gStoreKey('id', doc.id)]: null,
             [idsStoreKey]: ids.filter(x => x !== doc.id),
@@ -187,7 +187,7 @@ export default function createSchema(store, {
     async function hasConflict(id, doc) {
         const indexes = indexPropsFrom(doc).map(x => gStoreKey(x, doc[x]))
         if (indexes.length > 0) {
-            return store.read(indexes).then(res => {
+            return store.adapter.read(indexes).then(res => {
                 return Object.keys(res).some(x => res[x] && res[x] !== id)
             })
         } else {
