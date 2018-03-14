@@ -80,7 +80,7 @@ export default store => function createSchema({
      */
     async function create(raw = {}, options = {}) {
         const { omitReturn } = options
-        const id = uuid()
+        const id = raw.id || uuid()
         const doc = {
             ...validate(raw),
             id,
