@@ -26,8 +26,8 @@ export function installOrmToVuex(createOrm, options = {}) {
                         state.data[x] = null
                     })
                 },
-                actions,
             },
+            actions,
         })
     }
 }
@@ -49,11 +49,11 @@ export function installOrmToVue() {
     }
 }
 
-export const createFilters = (vuexStore, namespace) => ({
-    queryById(id, modelname, defaults) {
+export const registerOrmFilters = (Vue, vuexStore, namespace = 'entities') => {
+    Vue.filter('queryById', (id, modelname, defaults) => {
         return vuexStore.state[namespace].data[`${modelname}:id:${id}`] || defaults
-    },
-})
+    })
+}
 
 function createVuexAdapter(vuexStore, namespace) {
     function read(field) {

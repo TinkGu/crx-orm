@@ -1,0 +1,7 @@
+{
+  "name": "crx-orm/vue",
+  "private": true,
+  "main": "../lib/vue",
+  "module": "../es/vue",
+  "jsnext:main": "../es/vue"
+}
