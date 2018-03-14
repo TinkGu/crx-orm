@@ -2,9 +2,13 @@
 import { getFieldList } from '../utils'
 
 export function installOrmToVuex(createOrm, options = {}) {
-    const namespace = options.namespace || 'entities'
+    const { namespace = 'entities', actions } = options
 
     return vuexStore => {
+        const adapter = createVuexAdapter(vuexStore, namespace)
+        vuexStore.orm = createOrm(adapter)
+        vuexStore.models = vuexStore.orm.models
+
         vuexStore.registerModule(namespace, {
             namespaced: true,
             state: {
@@ -22,11 +26,9 @@ export function installOrmToVuex(createOrm, options = {}) {
                         state.data[x] = null
                     })
                 },
+                actions,
             },
         })
-
-        const adapter = createVuexAdapter(vuexStore, namespace)
-        vuexStore.orm = createOrm(adapter)
     }
 }
 
@@ -46,6 +48,12 @@ export function installOrmToVue() {
         },
     }
 }
+
+export const createFilters = (vuexStore, namespace) => ({
+    queryById(id, modelname, defaults) {
+        return vuexStore.state[namespace].data[`${modelname}:id:${id}`] || defaults
+    },
+})
 
 function createVuexAdapter(vuexStore, namespace) {
     function read(field) {

@@ -184,6 +184,7 @@ export default store => function createSchema({
         return createIndexesWithValue(doc, doc.id)
     }
 
+    // 索引必须唯一，所以一旦试图创建已经存在的索引，必须报错
     async function hasConflict(id, doc) {
         const indexes = indexPropsFrom(doc).map(x => gStoreKey(x, doc[x]))
         if (indexes.length > 0) {

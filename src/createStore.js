@@ -1,18 +1,23 @@
 import higherCreateSchema from './createSchema'
+import { relationshipFields, createRelationsManager } from './relationship'
 
 export default function createStore({
     adapter,
     schemas = [],
 }) {
+    const relationsManager = createRelationsManager()
     const store = {
         adapter,
         gStoreKey,
         gIdsStoreKey,
+        relationships: relationshipFields,
+        relationsManager,
         models: {},
     }
     store.createSchema = higherCreateSchema(store)
     schemas.forEach(x => {
         const model = x(store)
+        relationsManager.resolve(x)
         store.models[model.name] = model
     })
     return store
