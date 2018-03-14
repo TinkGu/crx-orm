@@ -14,8 +14,8 @@ export default function createRelationsManager() {
         _relationships[servant].belongsTo[master] = true
     }
 
-    function resolve(schema = {}) {
-        const { name, properties = {} } = schema
+    function resolve(model = {}) {
+        const { name, properties = {} } = model
         Object.values(properties).forEach(p => {
             if (p.type === 'relationship') {
                 link(p.relationship, name, p.modelname)
@@ -33,13 +33,20 @@ export default function createRelationsManager() {
         }
     }
 
-    function query(relationship, master, servant) {
-        return _relationships[master][relationship][servant]
+    function query(a, relationship, b) {
+        return !!(_relationships[a]
+            && _relationships[a][relationship]
+            && _relationships[a][relationship][b])
+    }
+
+    function snapshot() {
+        return _relationships
     }
 
     return {
         link,
         resolve,
         query,
+        snapshot,
     }
 }

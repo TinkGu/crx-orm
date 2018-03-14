@@ -10,14 +10,14 @@ export default function createStore({
         adapter,
         gStoreKey,
         gIdsStoreKey,
-        relationships: relationshipFields,
+        relationship: relationshipFields,
         relationsManager,
         models: {},
     }
     store.createSchema = higherCreateSchema(store)
     schemas.forEach(x => {
         const model = x(store)
-        relationsManager.resolve(x)
+        relationsManager.resolve(model)
         store.models[model.name] = model
     })
     return store
