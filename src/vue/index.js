@@ -50,8 +50,12 @@ export function installOrmToVue() {
 }
 
 export const registerOrmFilters = (Vue, vuexStore, namespace = 'entities') => {
-    Vue.filter('queryById', (id, modelname, defaults) => {
-        return vuexStore.state[namespace].data[`${modelname}:id:${id}`] || defaults
+    const queryById = (id, modelname) => vuexStore.state[namespace].data[`${modelname}:id:${id}`]
+    Vue.filter('queryById', (idOrIds, modelname, defaults) => {
+        if (Array.isArray(idOrIds)) {
+            return idOrIds.map(id => queryById(id, modelname) || defaults)
+        }
+        return queryById(idOrIds, modelname) || defaults
     })
 }
 
