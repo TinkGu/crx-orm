@@ -61,7 +61,8 @@ export default store => function createSchema({
      * read model ids
      */
     async function readIds() {
-        return store.adapter.read(idsStoreKey)
+        const ids = await store.adapter.read(idsStoreKey)
+        return ids || []
     }
 
     /**
@@ -94,7 +95,7 @@ export default store => function createSchema({
             throw new Error('crx-orm: conflict')
         }
 
-        const ids = (await readIds()) || []
+        const ids = await readIds()
         const indexes = createIndexes(doc)
 
         const returns = await store.adapter.set({
@@ -228,6 +229,10 @@ export default store => function createSchema({
 
     // 将 type relationship 标注的字段中的 id 填充为对应的 doc
     async function fillServantsFields(doc) {
+        if (!doc) {
+            return doc
+        }
+
         const newDoc = {}
         // NOTE： 记一个 storeKey: docKey 的 mapA，直接把 mapA 传入 store.read
         // store.read 返回一个 storeKey: doc 的 mapB

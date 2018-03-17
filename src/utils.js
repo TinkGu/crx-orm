@@ -20,8 +20,8 @@ export function higherUuid(store) {
         if (uid === undefined) {
             uid = (await store.adapter.read('__uuid__')) || '0'
         }
-        uid = parseInt(uid, 10) + 1
-        return uid.toString()
+        uid = (parseInt(uid, 10) + 1).toString()
+        return uid
     }
 
     function get() {
@@ -32,4 +32,9 @@ export function higherUuid(store) {
         next,
         get,
     }
+}
+
+// only for `{}`
+export function isEmptyObject(x) {
+    return x && typeof x === 'object' && Object.getOwnPropertyNames(x).length === 0
 }
