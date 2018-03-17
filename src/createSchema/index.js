@@ -16,7 +16,6 @@ export default store => function createSchema({
         return doc
     }
 
-
     /**
      * read the value of the specified storeKey
      */
@@ -45,10 +44,16 @@ export default store => function createSchema({
      * use id first, then try other index properties
      * otherwise, return null
      */
-    async function find(doc) {
+    async function find(doc, options = {}) {
+        const { isFull = true } = options
         const id = await readDocId(doc)
         if (id) {
-            return read('id', id)
+            const newDoc = await read('id', id)
+            if (isFull) {
+                return fillServantsFields(newDoc)
+            } else {
+                return newDoc
+            }
         } else {
             return null
         }
@@ -220,6 +225,56 @@ export default store => function createSchema({
         }
 
         return null
+    }
+
+    // 将 type relationship 标注的字段中的 id 填充为对应的 doc
+    async function fillServantsFields(doc) {
+        const newDoc = {}
+        // NOTE： 记一个 storeKey: docKey 的 mapA，直接把 mapA 传入 store.read
+        // store.read 返回一个 storeKey: doc 的 mapB
+        // 通过遍历 mapB，获得最终的 newDoc
+        const storeKeyDocKeyMap = {}
+        const keys = Object.keys(properties).filter(key => properties[key].type === 'relationship'
+            && key in doc
+            && doc[key] !== null)
+
+        if (keys.length === 0) {
+            return doc
+        }
+
+        keys.forEach(key => {
+            const prop = properties[key]
+            if (prop.relationship === 'hasOne') {
+                const storeKey = store.gStoreKey(prop.modelname, 'id', doc[key])
+                storeKeyDocKeyMap[storeKey] = key
+            }
+            if (prop.relationship === 'hasMany' && Array.isArray(doc[key])) {
+                doc[key].forEach(id => {
+                    storeKeyDocKeyMap[store.gStoreKey(prop.modelname, 'id', id)] = key
+                })
+            }
+        })
+
+        const servants = await store.adapter.read(storeKeyDocKeyMap)
+        Object.keys(servants).forEach(storeKey => {
+            const docKey = storeKeyDocKeyMap[storeKey]
+            const servantDoc = servants[storeKey]
+            const newDocProp = newDoc[docKey]
+            if (newDocProp) {
+                if (Array.isArray(newDocProp)) {
+                    newDoc[docKey].push(servantDoc)
+                } else {
+                    newDoc[docKey] = [newDocProp, servantDoc]
+                }
+            } else {
+                newDoc[docKey] = servantDoc
+            }
+        })
+
+        return {
+            ...doc,
+            ...newDoc,
+        }
     }
 
     return {

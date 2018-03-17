@@ -1,4 +1,4 @@
-import orm from '../src'
+import * as orm from '../src'
 import TagModel from './models/Tag'
 
 function createStore(initial) {
