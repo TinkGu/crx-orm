@@ -1,12 +1,17 @@
-export default function createCrxAdapter() {
+export default function createCrxAdapter(options = {}) {
+    const { storageArea = 'local' } = options
     /**
      * @param {String|Array|Object} field Object key to get object from storage
      * @return {Promise}
      */
     function read(field) {
         return new Promise(resolve => {
-            chrome.storage.sync.get(field, response => {
-                resolve(response)
+            chrome.storage[storageArea].get(field, response => {
+                if (typeof field === 'string') {
+                    resolve(response[field])
+                } else {
+                    resolve(response)
+                }
             })
         })
     }
@@ -26,7 +31,7 @@ export default function createCrxAdapter() {
      */
     function set(content) {
         return new Promise(resolve => {
-            chrome.storage.sync.set(
+            chrome.storage[storageArea].set(
                 content,
                 () => resolve()
             )
@@ -39,7 +44,7 @@ export default function createCrxAdapter() {
      */
     function remove(fields) {
         return new Promise(resolve => {
-            chrome.storage.sync.remove(fields, response => {
+            chrome.storage[storageArea].remove(fields, response => {
                 resolve(response)
             })
         })
