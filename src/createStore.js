@@ -1,5 +1,6 @@
 import higherCreateSchema from './createSchema'
 import { relationshipFields, createRelationsManager } from './relationship'
+import { higherUuid } from './utils'
 
 export default function createStore({
     adapter,
@@ -15,6 +16,7 @@ export default function createStore({
         models: {},
     }
     store.createSchema = higherCreateSchema(store)
+    store.uuid = higherUuid(store)
     schemas.forEach(x => {
         const model = x(store)
         relationsManager.resolve(model)

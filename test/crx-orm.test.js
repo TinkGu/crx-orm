@@ -111,3 +111,10 @@ describe('remove model', () => {
         expect(nameIndex).toBe(null)
     })
 })
+
+it('uuid', async () => {
+    expect.assertions(1)
+    const store = createStore()
+    await store.uuid.next()
+    expect(store.uuid.get()).toBe(1)
+})

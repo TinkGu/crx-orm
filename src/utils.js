@@ -13,3 +13,23 @@ export function getFieldList(field) {
 
     return []
 }
+
+export function higherUuid(store) {
+    let uid
+    async function next() {
+        if (uid === undefined) {
+            uid = (await store.adapter.read('__uuid__')) || '0'
+        }
+        uid = parseInt(uid, 10) + 1
+        return uid.toString()
+    }
+
+    function get() {
+        return uid
+    }
+
+    return {
+        next,
+        get,
+    }
+}

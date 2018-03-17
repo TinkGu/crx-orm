@@ -1,5 +1,3 @@
-import uuid from 'uuid'
-
 export default store => function createSchema({
     name,
     properties = {},
@@ -85,7 +83,7 @@ export default store => function createSchema({
      */
     async function create(raw = {}, options = {}) {
         const { omitReturn } = options
-        const id = raw.id || uuid()
+        const id = raw.id || await store.uuid.next()
         const doc = {
             ...validate(raw),
             id,
@@ -101,6 +99,7 @@ export default store => function createSchema({
 
         const returns = await store.adapter.set({
             ...indexes,
+            __uuid__: store.uuid.get(),
             [gStoreKey('id', id)]: doc,
             [idsStoreKey]: ids.concat(id),
         })
