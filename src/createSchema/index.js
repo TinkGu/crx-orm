@@ -263,15 +263,18 @@ export default store => function createSchema({
         Object.keys(servants).forEach(storeKey => {
             const docKey = storeKeyDocKeyMap[storeKey]
             const servantDoc = servants[storeKey]
-            const newDocProp = newDoc[docKey]
-            if (newDocProp) {
-                if (Array.isArray(newDocProp)) {
-                    newDoc[docKey].push(servantDoc)
-                } else {
-                    newDoc[docKey] = [newDocProp, servantDoc]
-                }
-            } else {
+            const propRelation = properties[docKey].relationship
+
+            if (propRelation === 'hasOne') {
                 newDoc[docKey] = servantDoc
+            }
+
+            if (propRelation === 'hasMany') {
+                if (newDoc[docKey] === undefined) {
+                    newDoc[docKey] = [servantDoc]
+                } else {
+                    newDoc[docKey].push(servantDoc)
+                }
             }
         })
 

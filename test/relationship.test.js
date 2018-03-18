@@ -43,19 +43,28 @@ it('query', () => {
 })
 
 it('read full document', async () => {
-    expect.assertions(1)
+    expect.assertions(2)
     const store = createStore()
     const tag1 = await store.models.tag.create({ name: 'tag1' })
     const tag2 = await store.models.tag.create({ name: 'tag2' })
     const tag3 = await store.models.tag.create({ name: 'tag3' })
-    const repo = await store.models.repo.create({
+    const repo1 = await store.models.repo.create({
         name: 'repo1',
         tags: [tag1.id, tag2.id, tag3.id]
     })
 
-    expect(repo.tags).toEqual([
+    const repo2 = await store.models.repo.create({
+        name: 'repo2',
+        tags: [tag1.id]
+    })
+
+    expect(repo1.tags).toEqual([
         tag1,
         tag2,
         tag3
+    ])
+
+    expect(repo2.tags).toEqual([
+        tag1
     ])
 })

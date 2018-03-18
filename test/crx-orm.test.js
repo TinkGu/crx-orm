@@ -116,5 +116,5 @@ it('uuid', async () => {
     expect.assertions(1)
     const store = createStore()
     await store.uuid.next()
-    expect(store.uuid.get()).toBe(1)
+    expect(store.uuid.get()).toBe('1')
 })
