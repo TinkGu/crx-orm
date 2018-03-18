@@ -38,3 +38,16 @@ export function higherUuid(store) {
 export function isEmptyObject(x) {
     return x && typeof x === 'object' && Object.getOwnPropertyNames(x).length === 0
 }
+
+export function uniqueArray(arr) {
+    const hash = {}
+    const result = []
+    arr.forEach(x => {
+        const ele = typeof x === 'string' ? x : x.id
+        if (ele && !(ele in hash)) {
+            hash[ele] = ele
+            result.push(ele)
+        }
+    })
+    return result
+}

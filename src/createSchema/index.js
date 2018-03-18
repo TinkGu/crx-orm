@@ -1,3 +1,5 @@
+import { uniqueArray } from '../utils'
+
 export default store => function createSchema({
     name,
     properties = {},
@@ -5,15 +7,6 @@ export default store => function createSchema({
     const indexProps = Object.keys(properties).filter(x => properties[x].setIndex)
     const gStoreKey = (k, v) => store.gStoreKey(name, k, v)
     const idsStoreKey = store.gIdsStoreKey(name)
-
-    // 验证
-    function validate(doc) {
-        // TODO
-        // 验证 type, required, 定义过的项
-        // 对于 relationship 项，验证是否是字符串
-        // loose 模式下不验证
-        return doc
-    }
 
     /**
      * read the value of the specified storeKey
@@ -126,12 +119,16 @@ export default store => function createSchema({
         const oldDoc = await find(queryDoc)
         if (!oldDoc) {
             // TODO: 报错，不存在
+            // options 可以设置一旦不存在即创建
         }
 
-        const doc = typeof setter === 'function'
+        const docAfterSet = typeof setter === 'function'
             ? setter(oldDoc)
             : Object.assign({}, oldDoc, setter)
-        doc.id = oldDoc.id
+        const doc = {
+            ...validate(docAfterSet),
+            id: oldDoc.id,
+        }
 
         if (await hasConflict(doc.id, doc)) {
             // TODO: 报错
@@ -283,6 +280,33 @@ export default store => function createSchema({
             ...doc,
             ...newDoc,
         }
+    }
+
+    // TODO
+    // 验证 type, required, 定义过的项
+    // loose 模式下不验证
+    function validate(doc) {
+        const newDoc = Object.assign({}, doc)
+        Object.keys(newDoc).forEach(key => {
+            const propSchema = properties[key]
+            const propv = newDoc[key]
+            if (!propSchema) {
+                return
+            }
+
+            if (propSchema.relationship === 'hasOne') {
+                if (typeof propv === 'object') {
+                    newDoc[key] = propv.id
+                }
+                return
+            }
+
+            if (propSchema.relationship === 'hasMany') {
+                newDoc[key] = uniqueArray(propv)
+                return
+            }
+        })
+        return newDoc
     }
 
     return {
