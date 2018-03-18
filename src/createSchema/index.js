@@ -10,6 +10,7 @@ export default store => function createSchema({
     function validate(doc) {
         // TODO
         // 验证 type, required, 定义过的项
+        // 对于 relationship 项，验证是否是字符串
         // loose 模式下不验证
         return doc
     }
